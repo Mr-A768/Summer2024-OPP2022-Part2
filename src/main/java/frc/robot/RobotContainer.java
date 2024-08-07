@@ -7,8 +7,12 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.FireCommand;
+import frc.robot.commands.FlywheelIdle;
+import frc.robot.commands.FlywheelPrep;
 import frc.robot.commands.IndexerCommand;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -27,10 +31,12 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final IndexerSubsystem m_indexerSubsystem = new IndexerSubsystem();
+  private final FlywheelSubsystem m_FlywheelSubsystem = new FlywheelSubsystem();
 
   private final Joystick controller = new Joystick(0);
 
   private final JoystickButton runIndexer = new JoystickButton(controller, XboxController.Button.kA.value);
+  private final JoystickButton fire = new JoystickButton(controller, XboxController.Button.kB.value);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -52,8 +58,12 @@ public class RobotContainer {
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
 
-    runIndexer.and(IndexerSubsystem.beamStatus.negate()).whileTrue(new IndexerCommand(m_indexerSubsystem)); // Prevents input while beam is broken
+    runIndexer.and(IndexerSubsystem.beamStatus.negate()).whileTrue(new IndexerCommand(m_indexerSubsystem)); // While runIndexer is pressed and the beam break is tripped, run the indexer
     
+    IndexerSubsystem.beamStatus.onTrue(new FlywheelPrep(m_FlywheelSubsystem)) // If the beam break is tripped, prep the flywheel
+      .and(fire.negate()).onFalse(new FlywheelIdle(m_FlywheelSubsystem)); // If the beam break isn't tripped and the fire button isn't being pressed, set the flywheel to idle
+
+    fire.whileTrue(new FireCommand(m_FlywheelSubsystem, m_indexerSubsystem)); // While fire is pressed, run the firing sequence
   }
 
   /**

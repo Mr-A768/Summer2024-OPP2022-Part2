@@ -16,4 +16,12 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+
+  public static class Flywheel {
+    public static final double idleRPM = 1000;
+    public static final double prepRPM = 3000;
+    public static final double firingRPM = 5000;
+  }
+
+
 }

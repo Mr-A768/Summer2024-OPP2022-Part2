@@ -48,4 +48,8 @@ public class IndexerSubsystem extends SubsystemBase {
     REVPhysicsSim.getInstance().run();
   }
 
+  public void resetBeamBreak() {
+    beamBreak.setValue(false);
+  }
+
 }
